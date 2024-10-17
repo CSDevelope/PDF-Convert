@@ -39,7 +39,9 @@ class FileHandler(FileSystemEventHandler):
                 elif file_extension in ['.xls', '.xlsx']:
                     convert_excel_to_pdf(filepath, pdf_filepath)
                 else:
-                    print(f"Unsupported file type: {file_extension}")
+                    print(f"Unsupported file type: {file_extension}. Deleting file.")
+                    time.sleep(1)  # Delay to ensure file is fully written before deletion
+                    os.remove(filepath)
             except Exception as e:
                 print(f"Failed to convert {filepath}: {e}")
 
@@ -72,7 +74,7 @@ def convert_excel_to_pdf(excel_path, pdf_path):
     excel_path = os.path.abspath(excel_path)  # Get the absolute path for the Excel file
     pdf_path = os.path.abspath(pdf_path)      # Get the absolute path for the PDF output
     
-    pythoncom.CoInitialize()  # Initialize COM library
+    pythoncom.CoInitialize()  
     excel = win32com.client.Dispatch("Excel.Application")
     excel.Visible = False
     try:
@@ -80,7 +82,7 @@ def convert_excel_to_pdf(excel_path, pdf_path):
         temp_pdf_path = os.path.join(tempfile.gettempdir(), os.path.basename(pdf_path))
         wb.WorkSheets.Select()
         wb.ActiveSheet.ExportAsFixedFormat(0, temp_pdf_path)
-        # Move the temporary PDF to the desired location
+        
         if os.path.exists(pdf_path):
             os.remove(pdf_path)
         os.rename(temp_pdf_path, pdf_path)
